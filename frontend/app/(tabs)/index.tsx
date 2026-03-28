@@ -39,6 +39,7 @@ export default function LogScreen() {
   const [newIcon, setNewIcon] = useState('star-outline');
   const [newColor, setNewColor] = useState('#C17767');
   const [dirty, setDirty] = useState(false);
+  const [dropdownField, setDropdownField] = useState<{ actId: string; field: ExtraField } | null>(null);
 
   const allActivities = [...DEFAULT_ACTIVITIES, ...customActivities];
 
@@ -157,6 +158,38 @@ export default function LogScreen() {
 
   const renderField = (actId: string, field: ExtraField) => {
     const val = entries[actId]?.[field.key] || '';
+
+    if (field.type === 'select' && field.options) {
+      return (
+        <View key={field.key} style={s.fieldWrap}>
+          <Text style={[s.fieldLabel, { color: colors.textMuted }]}>{field.label}</Text>
+          <TouchableOpacity
+            testID={`dropdown-${actId}-${field.key}`}
+            style={[
+              s.dropdownBtn,
+              {
+                backgroundColor: colors.background,
+                borderColor: val ? colors.primary : colors.border,
+              },
+            ]}
+            onPress={() => setDropdownField({ actId, field })}
+            activeOpacity={0.7}
+          >
+            <Text
+              style={[
+                s.dropdownText,
+                { color: val ? colors.textMain : colors.textMuted },
+              ]}
+              numberOfLines={1}
+            >
+              {val || `Select ${field.label}...`}
+            </Text>
+            <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
     return (
       <View key={field.key} style={s.fieldWrap}>
         <Text style={[s.fieldLabel, { color: colors.textMuted }]}>{field.label}</Text>
@@ -419,6 +452,59 @@ export default function LogScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Dropdown Selection Modal */}
+      <Modal visible={!!dropdownField} transparent animationType="fade">
+        <Pressable style={s.dropdownOverlay} onPress={() => setDropdownField(null)}>
+          <View style={[s.dropdownModal, { backgroundColor: colors.surface }]}>
+            <View style={s.dropdownHeader}>
+              <Text style={[s.dropdownTitle, { color: colors.textMain }]}>
+                {dropdownField?.field.label || 'Select'}
+              </Text>
+              <TouchableOpacity testID="dropdown-close" onPress={() => setDropdownField(null)}>
+                <Ionicons name="close" size={24} color={colors.textMuted} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={s.dropdownScroll} showsVerticalScrollIndicator={false}>
+              {dropdownField?.field.options?.map((option) => {
+                const isSelected = entries[dropdownField.actId]?.[dropdownField.field.key] === option;
+                return (
+                  <TouchableOpacity
+                    key={option}
+                    testID={`dropdown-option-${option.toLowerCase().replace(/\s+/g, '-')}`}
+                    style={[
+                      s.dropdownOption,
+                      {
+                        backgroundColor: isSelected ? colors.primary : 'transparent',
+                        borderColor: isSelected ? colors.primary : colors.border,
+                      },
+                    ]}
+                    onPress={() => {
+                      if (dropdownField) {
+                        updateEntry(dropdownField.actId, dropdownField.field.key, option);
+                      }
+                      setDropdownField(null);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Text
+                      style={[
+                        s.dropdownOptionText,
+                        { color: isSelected ? colors.primaryForeground : colors.textMain },
+                      ]}
+                    >
+                      {option}
+                    </Text>
+                    {isSelected && (
+                      <Ionicons name="checkmark" size={20} color={colors.primaryForeground} />
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </Pressable>
+      </Modal>
+
       {/* Add Activity Modal */}
       <Modal visible={showAddModal} transparent animationType="slide">
         <Pressable style={s.modalOverlay} onPress={() => setShowAddModal(false)}>
@@ -563,4 +649,28 @@ const s = StyleSheet.create({
   colorOption: { width: 36, height: 36, borderRadius: 18 },
   modalActions: { flexDirection: 'row', gap: 12, marginTop: 20 },
   modalBtn: { flex: 1, paddingVertical: 14, borderRadius: 10, alignItems: 'center' },
+  dropdownBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 12,
+  },
+  dropdownText: { fontSize: 15, flex: 1 },
+  dropdownOverlay: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  dropdownModal: {
+    borderRadius: 16, maxHeight: '60%', overflow: 'hidden',
+  },
+  dropdownHeader: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingHorizontal: 20, paddingTop: 20, paddingBottom: 12,
+  },
+  dropdownTitle: { fontSize: 18, fontWeight: '800' },
+  dropdownScroll: { paddingHorizontal: 12, paddingBottom: 16 },
+  dropdownOption: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingVertical: 14, paddingHorizontal: 16, borderRadius: 10,
+    borderWidth: 1, marginBottom: 6,
+  },
+  dropdownOptionText: { fontSize: 15, fontWeight: '600' },
 });
