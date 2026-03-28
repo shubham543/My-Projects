@@ -18,7 +18,8 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ.get('DB_NAME', 'progress_tracker')]
 
-EMERGENT_LLM_KEY = os.environ['EMERGENT_LLM_KEY']
+EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+GOOGLE_AI_API_KEY = os.environ['GOOGLE_AI_API_KEY']
 
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
@@ -193,10 +194,10 @@ Please provide a comprehensive daily review in this format:
 
     try:
         chat = LlmChat(
-            api_key=EMERGENT_LLM_KEY,
+            api_key=GOOGLE_AI_API_KEY,
             session_id=f"review-{req.date}-{uuid.uuid4().hex[:8]}",
             system_message="You are an expert personal productivity coach. Provide detailed, actionable, and encouraging daily reviews. Be specific with advice based on actual logged data."
-        ).with_model("anthropic", "claude-sonnet-4-5-20250929")
+        ).with_model("gemini", "gemini-2.5-flash")
 
         response = await chat.send_message(UserMessage(text=prompt))
 
