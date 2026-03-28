@@ -296,7 +296,7 @@ async def get_weekly_stats(date: str = None):
 
 @api_router.get("/library")
 async def get_library(filter_type: str = "all"):
-    logs = await db.daily_logs.find({}, {"_id": 0}).to_list(1000)
+    logs = await db.daily_logs.find({}, {"_id": 0, "date": 1, "entries": 1}).to_list(1000)
     items = []
     for log in logs:
         date = log.get("date", "")
