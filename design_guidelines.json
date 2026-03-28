@@ -1,0 +1,115 @@
+{
+  "theme": "Light / Dark / Auto",
+  "archetype": "Archetype 1 (Organic & Earthy)",
+  "design_philosophy": "A grounded, warm, and highly functional productivity app. Avoids the 'sterile tech' look by using warm undertones, soft shadows, and organic accent colors (terracotta, sage). High-end editorial feel combined with functional dashboard precision.",
+  "colors": {
+    "light": {
+      "background": "#F7F5F0",
+      "surface": "#FFFFFF",
+      "primary": "#C17767",
+      "primary_foreground": "#FFFFFF",
+      "secondary": "#728C69",
+      "secondary_foreground": "#FFFFFF",
+      "accent": "#D4B483",
+      "text_main": "#1A1D1A",
+      "text_muted": "#6E756B",
+      "border": "#E5E1D8",
+      "destructive": "#993333",
+      "success": "#4D734D"
+    },
+    "dark": {
+      "background": "#121412",
+      "surface": "#1A1D1A",
+      "primary": "#D18979",
+      "primary_foreground": "#121412",
+      "secondary": "#85A37B",
+      "secondary_foreground": "#121412",
+      "accent": "#E6C998",
+      "text_main": "#F7F5F0",
+      "text_muted": "#A3ACA0",
+      "border": "#2C312C",
+      "destructive": "#CC5252",
+      "success": "#73A673"
+    }
+  },
+  "typography": {
+    "headings": {
+      "family": "Manrope",
+      "weights": ["400", "800"],
+      "classes": "font-sans tracking-tight"
+    },
+    "body": {
+      "family": "IBM Plex Sans",
+      "weights": ["400", "500", "600"],
+      "classes": "font-sans leading-relaxed"
+    },
+    "scale": {
+      "h1": "text-4xl sm:text-5xl",
+      "h2": "text-2xl sm:text-3xl",
+      "h3": "text-xl sm:text-2xl",
+      "h4": "text-lg sm:text-xl",
+      "body": "text-base",
+      "small": "text-sm",
+      "overline": "text-xs uppercase tracking-[0.2em]"
+    },
+    "banned_fonts": ["Inter", "Roboto", "Open Sans", "Lato"]
+  },
+  "spacing_and_layout": {
+    "general": "Generous spacing philosophy. Use p-6 or p-8 for main containers. Embrace negative space.",
+    "grid_system": "Mode B (Control Room Grid) adapted for mobile-first. grid-cols-1 on mobile, md:grid-cols-2, lg:grid-cols-4. Gaps should be gap-4 to gap-6.",
+    "cards": "Subtle border (1px border-border), flat solid surfaces. Max rounded-md (8px radius) to keep it crisp.",
+    "navigation": "Sticky bottom nav for mobile using Glassmorphism (backdrop-blur-xl bg-background/80 border-t border-border). Top header should also use glassmorphism if content scrolls underneath.",
+    "alignment": "Left-align dense tracking content and logs. Center-align empty states or success messages."
+  },
+  "components": {
+    "buttons": "rounded-md. Primary CTAs use background primary with primary_foreground text. Secondary buttons use border and text_main. Hover states must explicitly set text and bg colors (e.g., hover:bg-primary/90).",
+    "ai_review_card": "Must stand out from normal logs. Use a subtle Glassmorphism background over the ai_review_background media image, with a 'Tracing Beam' or glowing border effect.",
+    "inputs_and_forms": "Use Shadcn customized primitives. 1px border, flat background. Focus states must have ring-2 ring-primary/50.",
+    "progress_bars": "Thick, rounded-full. Use secondary color (Sage) to represent positive habit completion.",
+    "daily_logger": "Bento-style layout for logging. Instead of a standard vertical list, group 'Work', 'Gym', 'Hobbies' into tappable bento blocks.",
+    "modals_drawers": "Use Shadcn Dialog/Drawer. Ensure overlay opacity is bg-black/50 maximum. Use solid background for modal body."
+  },
+  "animations_and_motion": {
+    "hover": "transition-all duration-200 ease-out",
+    "page_transition": "Use Framer Motion. Fade in and slide up slightly (y: 10).",
+    "micro_interactions": "Scale down slightly on active/tap (active:scale-95) for habit toggle buttons.",
+    "accessibility": "Respect prefers-reduced-motion. Do not rely solely on motion to convey status changes."
+  },
+  "icons": {
+    "library": "@phosphor-icons/react",
+    "installation_command": "yarn add @phosphor-icons/react",
+    "usage_rules": "Use Duotone or Light weights to match the sophisticated typography. Avoid heavy or filled icons unless indicating an 'active' state."
+  },
+  "media": {
+    "onboarding_hero": {
+      "url": "https://images.pexels.com/photos/20035788/pexels-photo-20035788.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "Flat lay of coffee, open notebook, pen, and eyeglasses. Warm, mindful aesthetic. Use on login or welcome screens.",
+      "overlay": "Use bg-black/30 overlay if placing text directly over it."
+    },
+    "ai_review_background": {
+      "url": "https://images.unsplash.com/photo-1764345713167-3058d61753ed?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1Mjh8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMHBhc3RlbCUyMHdhdmVzJTIwdGV4dHVyZXxlbnwwfHx8fDE3NzQ3MjI2NTV8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Abstract wavy pattern with pastel colors. Use as a low-opacity background image specifically for the AI Claude Daily Review sections.",
+      "overlay": "Must be heavily blurred or opacity-reduced (e.g., opacity-20) behind text to ensure readability."
+    },
+    "content_library_placeholder": {
+      "url": "https://images.unsplash.com/photo-1633544861856-820e8bdbb5fd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MDV8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwYm9va3MlMjBsaWJyYXJ5fGVufDB8fHx8MTc3NDcyMjY1Nnww&ixlib=rb-4.1.0&q=85",
+      "description": "Minimalist bookshelf filled with white books. Use for the content library hero banner or empty state illustration."
+    }
+  },
+  "accessibility_and_testing": {
+    "contrast": "Ensure minimum 4.5:1 ratio for normal text. Use text-shadow when placing text over images.",
+    "testing_attributes": "All interactive elements (buttons, links, form inputs, toggles, mood selectors, navigation items) MUST include a 'data-testid' attribute.",
+    "testing_naming_convention": "Use kebab-case, role-based naming (e.g., data-testid='log-activity-button', data-testid='theme-toggle', data-testid='ai-review-generate')."
+  },
+  "instructions_to_main_agent": [
+    "NOTE: The stack uses React.js and Tailwind CSS with a mobile-app UI paradigm. Use .js/.jsx extensions instead of .tsx.",
+    "1. Setup Tailwind CSS with the provided color hexes using CSS variables to support Dark/Light/Auto modes seamlessly.",
+    "2. Setup global typography using Manrope for headings and IBM Plex Sans for body text. Load these from Google Fonts.",
+    "3. Build a mobile-first PWA-style layout: Add a sticky bottom navigation bar (using Glassmorphism) with icons for Home (Log), AI Review, Stats, Library, History.",
+    "4. For the Daily Activity Logger, implement a bento grid or compact cards for predefined activities (Work, Gym, Hobbies) and include an 'Add Custom Activity' feature.",
+    "5. Integrate Shadcn/UI for complex components (Dialog for custom activities, Progress for weekly stats). Ensure you strip the default Vercel-look to match the specified Organic & Earthy archetype (max 8px border-radius, flat surfaces).",
+    "6. Ensure the AI Daily Review (Claude Sonnet 4.5 section) is visually distinct from normal logs by utilizing the 'ai_review_background' image.",
+    "7. Implement comprehensive 'data-testid' attributes across all components and interactive elements.",
+    "8. DO NOT use generic or placeholder images. Only use the URLs provided in the 'media' section of this JSON."
+  ]
+}
