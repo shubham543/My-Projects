@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  ActivityIndicator, RefreshControl,
+  ActivityIndicator, RefreshControl, Alert, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 import { useTheme } from '../../src/context/ThemeContext';
 import { api } from '../../src/utils/api';
 import { DEFAULT_ACTIVITIES } from '../../src/constants/activities';
@@ -34,6 +36,7 @@ export default function HistoryScreen() {
   const [expandedDate, setExpandedDate] = useState<string | null>(null);
   const [detail, setDetail] = useState<any>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const loadHistory = useCallback(async () => {
     setLoading(true);
@@ -52,6 +55,45 @@ export default function HistoryScreen() {
     setRefreshing(true);
     await loadHistory();
     setRefreshing(false);
+  };
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const data = await api.get('/export');
+      const jsonStr = JSON.stringify(data, null, 2);
+      const timestamp = new Date().toISOString().split('T')[0];
+      const fileName = `progress_tracker_backup_${timestamp}.json`;
+
+      if (Platform.OS === 'web') {
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(url);
+        Alert.alert('Export Complete', `Backup downloaded as ${fileName}`);
+      } else {
+        const fileUri = FileSystem.documentDirectory + fileName;
+        await FileSystem.writeAsStringAsync(fileUri, jsonStr, {
+          encoding: FileSystem.EncodingType.UTF8,
+        });
+        const canShare = await Sharing.isAvailableAsync();
+        if (canShare) {
+          await Sharing.shareAsync(fileUri, {
+            mimeType: 'application/json',
+            dialogTitle: 'Export Progress Data',
+            UTI: 'public.json',
+          });
+        } else {
+          Alert.alert('Export Complete', `Data saved to ${fileUri}`);
+        }
+      }
+    } catch (e: any) {
+      Alert.alert('Export Failed', e.message || 'Could not export data. Please try again.');
+    }
+    setExporting(false);
   };
 
   const toggleDate = async (date: string) => {
@@ -85,6 +127,37 @@ export default function HistoryScreen() {
       contentContainerStyle={s.content}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
     >
+      {/* Export Data Card */}
+      <View style={[s.exportCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={s.exportInfo}>
+          <View style={[s.exportIconWrap, { backgroundColor: colors.secondary + '20' }]}>
+            <Ionicons name="cloud-download-outline" size={24} color={colors.secondary} />
+          </View>
+          <View style={s.exportText}>
+            <Text style={[s.exportTitle, { color: colors.textMain }]}>Backup Your Data</Text>
+            <Text style={[s.exportSubtitle, { color: colors.textMuted }]}>
+              Export all logs, reviews & settings as JSON
+            </Text>
+          </View>
+        </View>
+        <TouchableOpacity
+          testID="export-data-btn"
+          style={[s.exportBtn, { backgroundColor: colors.secondary, opacity: exporting ? 0.6 : 1 }]}
+          onPress={handleExport}
+          disabled={exporting}
+          activeOpacity={0.7}
+        >
+          {exporting ? (
+            <ActivityIndicator size="small" color={colors.secondaryForeground} />
+          ) : (
+            <Ionicons name="download-outline" size={18} color={colors.secondaryForeground} />
+          )}
+          <Text style={[s.exportBtnText, { color: colors.secondaryForeground }]}>
+            {exporting ? 'Exporting...' : 'Export'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       {history.length === 0 ? (
         <View style={s.emptyState}>
           <Ionicons name="time-outline" size={48} color={colors.textMuted} />
@@ -249,4 +322,17 @@ const s = StyleSheet.create({
   emptyState: { alignItems: 'center', paddingVertical: 60, gap: 12 },
   emptyTitle: { fontSize: 20, fontWeight: '800' },
   emptySubtitle: { fontSize: 15, textAlign: 'center', lineHeight: 22, paddingHorizontal: 20 },
+  exportCard: {
+    borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 16, gap: 14,
+  },
+  exportInfo: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  exportIconWrap: { width: 48, height: 48, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+  exportText: { flex: 1 },
+  exportTitle: { fontSize: 16, fontWeight: '700' },
+  exportSubtitle: { fontSize: 13, marginTop: 2 },
+  exportBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    paddingVertical: 12, borderRadius: 10, gap: 8,
+  },
+  exportBtnText: { fontSize: 15, fontWeight: '700' },
 });

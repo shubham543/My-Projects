@@ -379,6 +379,41 @@ async def update_setting(key: str, update: SettingUpdate):
     return {"key": key, "value": update.value}
 
 
+@api_router.get("/export")
+async def export_all_data():
+    """Export all user data as JSON for backup."""
+    logs = await db.daily_logs.find({}, {"_id": 0}).sort("date", -1).to_list(5000)
+    reviews = await db.reviews.find({}, {"_id": 0}).sort("date", -1).to_list(5000)
+    custom_acts = await db.custom_activities.find({}, {"_id": 0}).to_list(100)
+    settings_list = await db.settings.find({}, {"_id": 0}).to_list(100)
+
+    total_days = len(logs)
+    total_reviews = len(reviews)
+    total_activities_logged = sum(
+        len([k for k, v in log.get("entries", {}).items() if v])
+        for log in logs
+    )
+    date_range = ""
+    if logs:
+        dates = [l["date"] for l in logs]
+        date_range = f"{min(dates)} to {max(dates)}"
+
+    return {
+        "export_info": {
+            "exported_at": datetime.now(timezone.utc).isoformat(),
+            "app": "Daily Progress Tracker",
+            "total_days_logged": total_days,
+            "total_reviews": total_reviews,
+            "total_activities_logged": total_activities_logged,
+            "date_range": date_range,
+        },
+        "daily_logs": logs,
+        "ai_reviews": reviews,
+        "custom_activities": custom_acts,
+        "settings": settings_list,
+    }
+
+
 app.include_router(api_router)
 
 app.add_middleware(
